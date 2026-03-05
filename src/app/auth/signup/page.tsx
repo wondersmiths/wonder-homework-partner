@@ -42,14 +42,12 @@ export default function SignUp() {
       // If the session is active (email confirmation disabled), redirect now.
       // If email confirmation is enabled, show a message.
       if (data.session) {
-        router.push(role === "parent" ? "/parent" : "/student/join");
+        window.location.href = role === "parent" ? "/parent" : "/student/join";
       } else {
         setError("");
         setLoading(false);
         // Show confirmation message
-        router.push(
-          `/auth/login?message=${encodeURIComponent("Check your email to confirm your account, then log in.")}`
-        );
+        window.location.href = `/auth/login?message=${encodeURIComponent("Check your email to confirm your account, then log in.")}`;
         return;
       }
     }

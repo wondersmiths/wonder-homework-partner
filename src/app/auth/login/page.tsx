@@ -20,10 +20,11 @@ function LoginForm() {
     setLoading(true);
     setError("");
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data: signInData, error: signInError } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
     if (signInError) {
       setError(signInError.message);
@@ -31,22 +32,24 @@ function LoginForm() {
       return;
     }
 
-    // Get profile to determine role
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      router.push(profile?.role === "parent" ? "/parent" : "/student");
+    if (!signInData.user) {
+      setError("Login failed. Please try again.");
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
+    // Get profile to determine role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", signInData.user.id)
+      .single();
+
+    const destination = profile?.role === "parent" ? "/parent" : "/student";
+
+    // Use window.location for a full page navigation to ensure
+    // middleware picks up the new auth cookies
+    window.location.href = destination;
   }
 
   return (

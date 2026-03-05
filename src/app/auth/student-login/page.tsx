@@ -46,7 +46,7 @@ export default function StudentLogin() {
         return;
       }
 
-      router.push("/student");
+      window.location.href = "/student";
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
