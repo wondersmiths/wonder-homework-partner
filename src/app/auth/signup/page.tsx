@@ -23,6 +23,12 @@ export default function SignUp() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          role,
+          full_name: fullName,
+        },
+      },
     });
 
     if (signUpError) {
@@ -32,17 +38,20 @@ export default function SignUp() {
     }
 
     if (data.user) {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({ id: data.user.id, role, full_name: fullName });
-
-      if (profileError) {
-        setError("Account created but profile setup failed. Please try logging in.");
+      // Profile is auto-created by database trigger using the metadata above.
+      // If the session is active (email confirmation disabled), redirect now.
+      // If email confirmation is enabled, show a message.
+      if (data.session) {
+        router.push(role === "parent" ? "/parent" : "/student/join");
+      } else {
+        setError("");
         setLoading(false);
+        // Show confirmation message
+        router.push(
+          `/auth/login?message=${encodeURIComponent("Check your email to confirm your account, then log in.")}`
+        );
         return;
       }
-
-      router.push(role === "parent" ? "/parent" : "/student/join");
     }
 
     setLoading(false);

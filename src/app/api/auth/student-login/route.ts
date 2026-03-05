@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
           email,
           password,
           email_confirm: true,
-          user_metadata: { role: "student", student_id: student.id },
+          user_metadata: { role: "student", full_name: student.name },
         });
 
       if (createError) {
@@ -69,12 +69,8 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Create profile record
-      await supabaseAdmin
-        .from("profiles")
-        .insert({ id: newUser.user.id, role: "student", full_name: student.name });
-
-      // Link student record
+      // Profile is auto-created by the on_auth_user_created trigger.
+      // Link student record to the new auth user.
       await supabaseAdmin
         .from("students")
         .update({ user_id: newUser.user.id })

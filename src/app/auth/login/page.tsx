@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Login() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,6 +53,12 @@ export default function Login() {
     <div className="max-w-md mx-auto mt-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Log In</h1>
       <p className="text-gray-600 mb-8">Welcome back to Wonder Mentorship.</p>
+
+      {message && (
+        <div className="p-3 bg-indigo-50 text-indigo-700 text-sm rounded-lg mb-4">
+          {message}
+        </div>
+      )}
 
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
@@ -115,5 +123,13 @@ export default function Login() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
