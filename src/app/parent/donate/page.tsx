@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function Donate() {
@@ -97,27 +98,30 @@ export default function Donate() {
               <p className="text-gray-700">{message}</p>
             </div>
 
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3">
-                Choose an amount:
+            {/* PayPal QR Code */}
+            <div className="p-6 bg-white rounded-xl border border-gray-200 text-center">
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                Scan to Donate via PayPal
+              </h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Open your phone camera or PayPal app and scan the code below.
               </p>
-              <div className="flex gap-3">
-                {[5, 10, 25].map((amount) => (
-                  <button
-                    key={amount}
-                    onClick={() => handleDonate(amount)}
-                    disabled={loading}
-                    className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
-                      selectedAmount === amount
-                        ? "bg-indigo-600 text-white"
-                        : "bg-white border border-gray-300 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50"
-                    } disabled:opacity-50`}
-                  >
-                    ${amount}
-                  </button>
-                ))}
+              <div className="inline-block p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                <Image
+                  src="/paypal-qr.png"
+                  alt="PayPal donation QR code"
+                  width={220}
+                  height={220}
+                  className="rounded-lg"
+                />
               </div>
-              <p className="text-xs text-gray-500 mt-3">
+              <p className="text-xs text-gray-400 mt-3">
+                You can donate any amount you choose.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs text-gray-500">
                 It costs about $0.50 per student per month to run this platform.
               </p>
             </div>
