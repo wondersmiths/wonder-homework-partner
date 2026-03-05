@@ -15,6 +15,24 @@ TASK:
 3. Provide hints for improvement.
 4. Never mention donations or costs.
 
+Return JSON:`,
+
+  gradeHomeworkImage: (studentName: string, gradeLevel: string) => `
+You are an AI tutor for grades 3-8.
+
+The student has uploaded a photo of their homework. Look at the image carefully.
+
+INPUT:
+- Student: ${studentName}
+- Grade Level: ${gradeLevel}
+
+TASK:
+1. Read all problems and the student's written answers from the image.
+2. Grade each problem.
+3. Explain mistakes in simple, encouraging language appropriate for grade ${gradeLevel}.
+4. Provide hints for improvement.
+5. Never mention donations or costs.
+
 Return JSON:
 {
   "grades": [

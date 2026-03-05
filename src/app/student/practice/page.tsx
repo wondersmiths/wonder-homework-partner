@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface PracticeProblem {
@@ -25,6 +26,30 @@ const TOPIC_OPTIONS = [
 export default function Practice() {
   const [studentName, setStudentName] = useState("");
   const [gradeLevel, setGradeLevel] = useState("5");
+  const [studentId, setStudentId] = useState<string | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function loadProfile() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: student } = await supabase
+        .from("students")
+        .select("id, name, grade_level")
+        .eq("user_id", user.id)
+        .single();
+
+      if (student) {
+        setStudentId(student.id);
+        setStudentName(student.name);
+        setGradeLevel(String(student.grade_level));
+      }
+    }
+    loadProfile();
+  }, [supabase]);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [problems, setProblems] = useState<PracticeProblem[]>([]);
@@ -54,6 +79,7 @@ export default function Practice() {
           studentName,
           gradeLevel,
           topics: selectedTopics,
+          studentId,
         }),
       });
 

@@ -1,7 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { createClient } from "@/lib/supabase/client";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import Link from "next/link";
+
+interface Student {
+  id: string;
+  name: string;
+  grade_level: number;
+}
 
 interface ReportResponse {
   weekly_summary: string;
@@ -10,20 +18,40 @@ interface ReportResponse {
 }
 
 export default function WeeklyReport() {
-  const [studentName, setStudentName] = useState("");
-  const [gradeLevel, setGradeLevel] = useState("5");
-  const [problemsCompleted, setProblemsCompleted] = useState("20");
-  const [accuracy, setAccuracy] = useState("75");
-  const [topics, setTopics] = useState("");
+  const [children, setChildren] = useState<Student[]>([]);
+  const [selectedChild, setSelectedChild] = useState<string>("");
   const [strengths, setStrengths] = useState("");
   const [improvements, setImprovements] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [report, setReport] = useState<ReportResponse | null>(null);
   const [error, setError] = useState("");
+  const supabase = createClient();
+
+  const loadChildren = useCallback(async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("students")
+      .select("id, name, grade_level")
+      .eq("parent_id", user.id)
+      .order("created_at");
+
+    setChildren(data || []);
+    if (data?.length) setSelectedChild(data[0].id);
+    setLoading(false);
+  }, [supabase]);
+
+  useEffect(() => {
+    loadChildren();
+  }, [loadChildren]);
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
+    setGenerating(true);
     setError("");
     setReport(null);
 
@@ -32,14 +60,7 @@ export default function WeeklyReport() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          studentName,
-          gradeLevel,
-          problemsCompleted: parseInt(problemsCompleted),
-          accuracyAverage: parseInt(accuracy) / 100,
-          topicsPracticed: topics
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean),
+          studentId: selectedChild,
           strengths: strengths
             .split(",")
             .map((s) => s.trim())
@@ -58,127 +79,91 @@ export default function WeeklyReport() {
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
-      setLoading(false);
+      setGenerating(false);
     }
+  }
+
+  if (loading) return <LoadingSpinner message="Loading..." />;
+
+  if (children.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600 mb-4">
+          You haven&apos;t added any children yet.
+        </p>
+        <Link
+          href="/parent/children"
+          className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors inline-block"
+        >
+          Add a Child
+        </Link>
+      </div>
+    );
   }
 
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Weekly Report</h1>
       <p className="text-gray-600 mb-8">
-        Generate a progress report for your child&apos;s learning this week.
+        Generate a progress report based on your child&apos;s actual homework
+        and practice activity this week.
       </p>
 
       <form onSubmit={handleGenerate} className="space-y-4 max-w-2xl">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Child&apos;s Name
-            </label>
-            <input
-              type="text"
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Grade Level
-            </label>
-            <select
-              value={gradeLevel}
-              onChange={(e) => setGradeLevel(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              {[3, 4, 5, 6, 7, 8].map((g) => (
-                <option key={g} value={g}>
-                  Grade {g}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Problems Completed
-            </label>
-            <input
-              type="number"
-              value={problemsCompleted}
-              onChange={(e) => setProblemsCompleted(e.target.value)}
-              min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Average Accuracy (%)
-            </label>
-            <input
-              type="number"
-              value={accuracy}
-              onChange={(e) => setAccuracy(e.target.value)}
-              min="0"
-              max="100"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Topics Practiced (comma-separated)
+            Select Child
           </label>
-          <input
-            type="text"
-            value={topics}
-            onChange={(e) => setTopics(e.target.value)}
+          <select
+            value={selectedChild}
+            onChange={(e) => setSelectedChild(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="e.g., Fractions, Multiplication, Word Problems"
-          />
+          >
+            {children.map((child) => (
+              <option key={child.id} value={child.id}>
+                {child.name} (Grade {child.grade_level})
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Strengths (comma-separated)
+              Strengths you&apos;ve noticed (optional)
             </label>
             <input
               type="text"
               value={strengths}
               onChange={(e) => setStrengths(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="e.g., Addition, Quick learner"
+              placeholder="e.g., Stays focused, Quick learner"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Areas to Improve (comma-separated)
+              Areas to work on (optional)
             </label>
             <input
               type="text"
               value={improvements}
               onChange={(e) => setImprovements(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="e.g., Fractions, Long division"
+              placeholder="e.g., Fractions, Reading carefully"
             />
           </div>
         </div>
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={generating}
           className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
         >
-          {loading ? "Generating..." : "Generate Report"}
+          {generating ? "Generating..." : "Generate Report"}
         </button>
       </form>
 
-      {loading && <LoadingSpinner message="Creating progress report..." />}
+      {generating && <LoadingSpinner message="Creating progress report..." />}
 
       {error && (
         <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-lg">

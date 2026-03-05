@@ -4,6 +4,8 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+type ImageMediaType = "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+
 export async function askClaude(
   systemPrompt: string,
   userPrompt: string
@@ -13,6 +15,44 @@ export async function askClaude(
     max_tokens: 2048,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
+  });
+
+  const block = message.content[0];
+  if (block.type === "text") {
+    return block.text;
+  }
+  throw new Error("Unexpected response type from Claude");
+}
+
+export async function askClaudeWithImage(
+  systemPrompt: string,
+  userPrompt: string,
+  imageBase64: string,
+  mediaType: ImageMediaType
+): Promise<string> {
+  const message = await client.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 2048,
+    system: systemPrompt,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: mediaType,
+              data: imageBase64,
+            },
+          },
+          {
+            type: "text",
+            text: userPrompt,
+          },
+        ],
+      },
+    ],
   });
 
   const block = message.content[0];

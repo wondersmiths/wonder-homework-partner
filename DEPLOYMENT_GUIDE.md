@@ -4,6 +4,7 @@
 
 - Node.js 18+ installed
 - An Anthropic API key (get one at https://console.anthropic.com)
+- A Supabase project (free at https://supabase.com)
 - A Vercel, Railway, or similar hosting account (for production)
 
 ## Local Development
@@ -14,21 +15,30 @@
 npm install
 ```
 
-### 2. Configure environment variables
+### 2. Set up Supabase
 
-Copy the example env file and add your API key:
+1. Create a new project at https://supabase.com/dashboard
+2. Go to **SQL Editor** and run the contents of `supabase/schema.sql` to create all tables and security policies
+3. Go to **Authentication > Providers** and ensure **Email** is enabled
+4. Copy your project URL and anon key from **Settings > API**
+
+### 3. Configure environment variables
+
+Copy the example env file and fill in your keys:
 
 ```bash
-cp .env.local.example .env.local
+cp env.example .env.local
 ```
 
 Edit `.env.local`:
 
 ```
 ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...your-anon-key
 ```
 
-### 3. Start the development server
+### 4. Start the development server
 
 ```bash
 npm run dev
@@ -48,10 +58,12 @@ Vercel is the simplest option for Next.js apps.
 
 2. Go to https://vercel.com and import your repository.
 
-3. Add your environment variable in the Vercel dashboard:
+3. Add your environment variables in the Vercel dashboard:
    - Go to **Settings > Environment Variables**
-   - Add `ANTHROPIC_API_KEY` with your API key
-   - Apply to **Production**, **Preview**, and **Development**
+   - Add `ANTHROPIC_API_KEY` with your Anthropic API key
+   - Add `NEXT_PUBLIC_SUPABASE_URL` with your Supabase project URL
+   - Add `NEXT_PUBLIC_SUPABASE_ANON_KEY` with your Supabase anon key
+   - Apply all to **Production**, **Preview**, and **Development**
 
 4. Click **Deploy**. Vercel will build and deploy automatically.
 
@@ -61,7 +73,7 @@ Vercel is the simplest option for Next.js apps.
 
 1. Go to https://railway.app and create a new project from your GitHub repo.
 
-2. Add the environment variable `ANTHROPIC_API_KEY` in the Railway dashboard.
+2. Add the environment variables `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in the Railway dashboard.
 
 3. Railway will auto-detect Next.js and deploy. No additional config needed.
 
@@ -99,7 +111,11 @@ Build and run:
 
 ```bash
 docker build -t wonder-mentorship .
-docker run -p 3000:3000 -e ANTHROPIC_API_KEY=sk-ant-xxx wonder-mentorship
+docker run -p 3000:3000 \
+  -e ANTHROPIC_API_KEY=sk-ant-xxx \
+  -e NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key \
+  wonder-mentorship
 ```
 
 ### Option D: Node.js Server
@@ -124,11 +140,13 @@ pm2 startup
 
 ## Environment Variables Reference
 
-| Variable            | Required | Description                        |
-| ------------------- | -------- | ---------------------------------- |
-| `ANTHROPIC_API_KEY` | Yes      | Your Anthropic API key             |
-| `PORT`              | No       | Server port (default: 3000)        |
-| `NODE_ENV`          | No       | Set to `production` for prod builds|
+| Variable                       | Required | Description                          |
+| ------------------------------ | -------- | ------------------------------------ |
+| `ANTHROPIC_API_KEY`            | Yes      | Your Anthropic API key               |
+| `NEXT_PUBLIC_SUPABASE_URL`     | Yes      | Your Supabase project URL            |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`| Yes      | Your Supabase anonymous/public key   |
+| `PORT`                         | No       | Server port (default: 3000)          |
+| `NODE_ENV`                     | No       | Set to `production` for prod builds  |
 
 ---
 
@@ -143,10 +161,39 @@ pm2 startup
 
 ---
 
+## Supabase Setup
+
+The database schema is in `supabase/schema.sql`. It creates:
+
+| Table               | Purpose                                        |
+| ------------------- | ---------------------------------------------- |
+| `profiles`          | User accounts with role (parent or student)    |
+| `students`          | Child profiles with join codes, linked to parents |
+| `grading_sessions`  | Homework submission history per student        |
+| `grading_results`   | Individual problem results per session         |
+| `practice_sessions` | Practice problem generation history            |
+
+Row-level security (RLS) is enabled on all tables:
+- Parents can only see their own children's data
+- Students can only see their own data
+- Join codes are publicly readable so students can look them up during linking
+
+### Authentication
+
+The app uses Supabase Auth with email/password. In your Supabase dashboard:
+
+1. Go to **Authentication > Providers**
+2. Enable **Email** provider
+3. Optionally disable email confirmation for development (Authentication > Settings > "Enable email confirmations" toggle)
+
+---
+
 ## Security Checklist
 
-- [ ] API key is stored in environment variables, never in code
+- [ ] API keys are stored in environment variables, never in code
 - [ ] `.env.local` is in `.gitignore` (it is by default)
+- [ ] Supabase RLS policies are applied (included in schema.sql)
+- [ ] Supabase anon key is used (not the service role key) in the frontend
 - [ ] Rate limiting is configured for production
 - [ ] HTTPS is enabled (automatic on Vercel/Railway)
 - [ ] Student content guardrails are active (built into the app)
@@ -156,5 +203,6 @@ pm2 startup
 ## Monitoring
 
 - Check the Anthropic dashboard for API usage: https://console.anthropic.com
+- Check the Supabase dashboard for database usage and auth activity
 - Monitor server logs for errors in the `/api/*` routes
 - On Vercel: use the built-in **Functions** tab for serverless function logs
