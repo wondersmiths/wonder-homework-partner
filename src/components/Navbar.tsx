@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ensureProfile } from "@/lib/ensure-profile";
 
 const studentLinks = [
   { href: "/student", label: "Home" },
@@ -34,11 +35,7 @@ export default function Navbar() {
         setUser(authUser);
 
         if (authUser) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", authUser.id)
-            .single();
+          const profile = await ensureProfile(supabase);
           setRole(profile?.role || null);
         }
       } catch {

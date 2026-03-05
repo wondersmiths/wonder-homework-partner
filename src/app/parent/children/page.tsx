@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ensureProfile } from "@/lib/ensure-profile";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface Student {
@@ -58,6 +59,13 @@ export default function ManageChildren() {
     setAdding(true);
     setError("");
 
+    const profile = await ensureProfile(supabase);
+    if (!profile) {
+      setError("You must be logged in. Please log out and log back in.");
+      setAdding(false);
+      return;
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -99,6 +107,8 @@ export default function ManageChildren() {
       .insert(insertData);
 
     if (insertError) {
+      console.error("Add child error:", insertError);
+
       if (insertError.code === "23505" && insertError.message?.includes("username")) {
         setError("That username is already taken. Try a different one.");
         setAdding(false);
@@ -111,12 +121,21 @@ export default function ManageChildren() {
           .from("students")
           .insert(insertData);
         if (retryError) {
-          setError("Failed to add child. Please try again.");
+          console.error("Add child retry error:", retryError);
+          setError(`Failed to add child: ${retryError.message}`);
           setAdding(false);
           return;
         }
+      } else if (insertError.code === "42501") {
+        setError("Permission denied. Please log out and log back in.");
+        setAdding(false);
+        return;
+      } else if (insertError.code === "42703") {
+        setError("Database needs updating. Please run the latest migration (migration_add_student_login.sql).");
+        setAdding(false);
+        return;
       } else {
-        setError("Failed to add child. Please try again.");
+        setError(`Failed to add child: ${insertError.message}`);
         setAdding(false);
         return;
       }
