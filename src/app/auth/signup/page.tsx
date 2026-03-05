@@ -140,12 +140,28 @@ export default function SignUp() {
           {loading ? "Creating account..." : "Sign Up"}
         </button>
 
-        <p className="text-sm text-gray-600 text-center">
-          Already have an account?{" "}
-          <Link href="/auth/login" className="text-indigo-600 hover:underline">
-            Log in
-          </Link>
-        </p>
+        <div className="text-sm text-gray-600 text-center space-y-1">
+          <p>
+            Already have an account?{" "}
+            <Link
+              href="/auth/login"
+              className="text-indigo-600 hover:underline"
+            >
+              Log in
+            </Link>
+          </p>
+          {role === "student" && (
+            <p>
+              No email?{" "}
+              <Link
+                href="/auth/student-login"
+                className="text-indigo-600 hover:underline"
+              >
+                Log in with username + PIN
+              </Link>
+            </p>
+          )}
+        </div>
       </form>
     </div>
   );

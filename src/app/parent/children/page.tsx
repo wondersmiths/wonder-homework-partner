@@ -10,6 +10,7 @@ interface Student {
   grade_level: number;
   join_code: string;
   user_id: string | null;
+  username: string | null;
 }
 
 export default function ManageChildren() {
@@ -18,6 +19,8 @@ export default function ManageChildren() {
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
   const [newGrade, setNewGrade] = useState("5");
+  const [newUsername, setNewUsername] = useState("");
+  const [newPin, setNewPin] = useState("");
   const [error, setError] = useState("");
   const supabase = createClient();
 
@@ -65,24 +68,48 @@ export default function ManageChildren() {
     }
 
     const joinCode = generateCode();
+    const trimmedUsername = newUsername.trim().toLowerCase() || null;
 
-    const { error: insertError } = await supabase.from("students").insert({
+    if (trimmedUsername && !/^[a-z0-9_]{3,20}$/.test(trimmedUsername)) {
+      setError("Username must be 3-20 characters: letters, numbers, or underscores.");
+      setAdding(false);
+      return;
+    }
+
+    if (trimmedUsername && (newPin.length < 4 || newPin.length > 6)) {
+      setError("PIN must be 4-6 digits.");
+      setAdding(false);
+      return;
+    }
+
+    const insertData: Record<string, string | number | null> = {
       parent_id: user.id,
       name: newName,
       grade_level: parseInt(newGrade),
       join_code: joinCode,
-    });
+    };
+
+    if (trimmedUsername) {
+      insertData.username = trimmedUsername;
+      insertData.pin = newPin;
+    }
+
+    const { error: insertError } = await supabase
+      .from("students")
+      .insert(insertData);
 
     if (insertError) {
+      if (insertError.code === "23505" && insertError.message?.includes("username")) {
+        setError("That username is already taken. Try a different one.");
+        setAdding(false);
+        return;
+      }
       if (insertError.code === "23505") {
         // Unique constraint on join_code, retry
-        const retryCode = generateCode();
-        const { error: retryError } = await supabase.from("students").insert({
-          parent_id: user.id,
-          name: newName,
-          grade_level: parseInt(newGrade),
-          join_code: retryCode,
-        });
+        insertData.join_code = generateCode();
+        const { error: retryError } = await supabase
+          .from("students")
+          .insert(insertData);
         if (retryError) {
           setError("Failed to add child. Please try again.");
           setAdding(false);
@@ -97,6 +124,8 @@ export default function ManageChildren() {
 
     setNewName("");
     setNewGrade("5");
+    setNewUsername("");
+    setNewPin("");
     await loadChildren();
     setAdding(false);
   }
@@ -140,18 +169,39 @@ export default function ManageChildren() {
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   {child.user_id ? (
-                    <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
-                      Linked
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                        Linked
+                      </span>
+                      {child.username && (
+                        <p className="text-xs text-gray-500">
+                          Username: <span className="font-mono">{child.username}</span>
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <div>
-                      <p className="text-xs text-gray-500">Join Code</p>
-                      <p className="text-lg font-mono font-bold text-indigo-600 tracking-wider">
-                        {child.join_code}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Share this with your child
-                      </p>
+                      {child.username ? (
+                        <>
+                          <p className="text-xs text-gray-500">Student Login</p>
+                          <p className="text-sm font-mono font-bold text-indigo-600">
+                            {child.username}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Username + PIN set
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-xs text-gray-500">Join Code</p>
+                          <p className="text-lg font-mono font-bold text-indigo-600 tracking-wider">
+                            {child.join_code}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Share this with your child
+                          </p>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -205,6 +255,51 @@ export default function ManageChildren() {
             </div>
           </div>
 
+          <div className="border-t border-gray-200 pt-4 mt-2">
+            <p className="text-sm font-medium text-gray-700 mb-1">
+              Student Login (no email needed)
+            </p>
+            <p className="text-xs text-gray-500 mb-3">
+              Set a username and PIN so your child can log in without an email
+              address. Leave blank if they&apos;ll use email sign-up + join code
+              instead.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={newUsername}
+                  onChange={(e) =>
+                    setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))
+                  }
+                  maxLength={20}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
+                  placeholder="e.g., alex123"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  PIN
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={newPin}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    if (val.length <= 6) setNewPin(val);
+                  }}
+                  maxLength={6}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono tracking-widest"
+                  placeholder="e.g., 1234"
+                />
+              </div>
+            </div>
+          </div>
+
           {error && (
             <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg">
               {error}
@@ -213,7 +308,7 @@ export default function ManageChildren() {
 
           <button
             type="submit"
-            disabled={adding}
+            disabled={adding || (!!newUsername && newPin.length < 4)}
             className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
           >
             {adding ? "Adding..." : "Add Child"}

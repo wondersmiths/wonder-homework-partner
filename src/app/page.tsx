@@ -39,6 +39,13 @@ export default function Home() {
           </p>
         </Link>
       </div>
+
+      <Link
+        href="/auth/student-login"
+        className="text-sm text-indigo-600 hover:underline"
+      >
+        Student without email? Log in with username + PIN
+      </Link>
     </div>
   );
 }

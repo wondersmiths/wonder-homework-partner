@@ -81,6 +81,12 @@ export default function Navbar() {
             ) : (
               <>
                 <Link
+                  href="/auth/student-login"
+                  className="text-sm text-gray-600 hover:text-indigo-500"
+                >
+                  Student Login
+                </Link>
+                <Link
                   href="/auth/login"
                   className="text-sm text-gray-600 hover:text-indigo-500"
                 >

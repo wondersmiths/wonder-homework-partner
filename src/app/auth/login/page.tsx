@@ -93,12 +93,26 @@ export default function Login() {
           {loading ? "Logging in..." : "Log In"}
         </button>
 
-        <p className="text-sm text-gray-600 text-center">
-          Don&apos;t have an account?{" "}
-          <Link href="/auth/signup" className="text-indigo-600 hover:underline">
-            Sign up
-          </Link>
-        </p>
+        <div className="text-sm text-gray-600 text-center space-y-1">
+          <p>
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/auth/signup"
+              className="text-indigo-600 hover:underline"
+            >
+              Sign up
+            </Link>
+          </p>
+          <p>
+            Student without email?{" "}
+            <Link
+              href="/auth/student-login"
+              className="text-indigo-600 hover:underline"
+            >
+              Log in with username + PIN
+            </Link>
+          </p>
+        </div>
       </form>
     </div>
   );
