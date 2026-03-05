@@ -109,15 +109,16 @@ Generate a gentle, impact-based donation message for a parent (NOT a student).
 
 INPUT:
 - Problems their child completed: ${problemsCompleted}
-- Cost per student: $0.50
+- Cost per student per month: $0.50
 - Donor status: ${donorStatus}
-- Suggested amounts: $5, $10, $25
 
 TASK:
-- Softly encourage donation.
-- Highlight student impact.
-- Keep message under 120 words.
-- Never pressure.
+- Softly encourage donation via the PayPal QR code shown on the page.
+- ${problemsCompleted > 0 ? `Mention that their child has completed ${problemsCompleted} problems.` : "Focus on the mission of keeping tutoring free for all students."}
+- Do NOT mention specific dollar amounts like $5, $10, $25 — the donor chooses their own amount.
+- Keep message under 100 words.
+- Never pressure. Be warm and genuine.
+- Vary your tone — do not always use the same structure or phrases.
 
 Return JSON:
 {
