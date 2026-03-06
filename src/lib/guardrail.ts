@@ -1,11 +1,10 @@
 const BLOCKED_PATTERNS = [
   /donat/i,
-  /contribut/i,
+  /contribut(?!.*equation)/i,
   /payment/i,
   /paypal/i,
-  /\$\d+/,
-  /cost per/i,
-  /fund/i,
+  /cost per student/i,
+  /fundrais/i,
   /sponsor/i,
   /tax.deducti/i,
 ];

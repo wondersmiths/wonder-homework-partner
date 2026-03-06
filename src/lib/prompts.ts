@@ -1,25 +1,103 @@
-export const SYSTEM_PROMPT = `You are an AI math tutor for grades 3-8. Be encouraging. Never mention donations or costs. Return ONLY valid JSON, no other text. Be concise. Always verify arithmetic by substituting answers back.`;
+export const SYSTEM_PROMPT = `You are an AI math tutor for Wonder Mentorship, a nonprofit homework partner for students in grades 3-8. You are encouraging, patient, and mentor-like. You promote a growth mindset. You NEVER mention donations, costs, or payment. Return ONLY valid JSON, no other text.
+
+IMPORTANT: Always verify your arithmetic by substituting answers back into the original equation. Getting the math right is your #1 priority.`;
 
 export const PROMPTS = {
   gradeHomework: (studentName: string, gradeLevel: string, problems: string) => `
-Grade ${studentName}'s homework (grade ${gradeLevel}). Solve each problem yourself first, verify by substituting back, then compare with student's answer.
+Grade ${studentName}'s homework (grade ${gradeLevel}).
 
-Problems: ${problems}
+For EACH problem:
+1. Write "work" field FIRST: solve step-by-step and verify by substituting back
+2. Then set correct_answer and score based on your verified solution
+3. Write a clear explanation (2-3 sentences) that teaches the concept, not just states right/wrong
+4. For wrong answers: show where they went wrong and the correct approach
+5. For correct answers: reinforce what they did well
 
-Return ONLY this JSON (write "work" FIRST to solve before scoring):
-{"grades":[{"work":"solve+verify","problem":"...","student_answer":"...","correct_answer":"...","score":1or0,"explanation":"...","hint":"..."}],"overall_score":"X/Y","encouragement":"..."}`,
-
-  gradeHomeworkImage: (studentName: string, gradeLevel: string) => `
-Read the homework photo. Grade ${studentName}'s work (grade ${gradeLevel}). Solve each problem yourself first, verify by substituting back, then compare with student's answer.
-
-Return ONLY this JSON (write "work" FIRST to solve before scoring):
-{"grades":[{"work":"solve+verify","problem":"...","student_answer":"...","correct_answer":"...","score":1or0,"explanation":"...","hint":"..."}],"overall_score":"X/Y","encouragement":"..."}`,
-
-  generatePractice: (studentName: string, gradeLevel: string, topics: string[]) => `
-Generate 5 practice problems for ${studentName} (grade ${gradeLevel}) on: ${topics.join(", ")}. Verify each solution by substituting back.
+Problems:
+${problems}
 
 Return ONLY this JSON:
-{"practice_problems":[{"problem":"...","solution":"...","explanation":"step-by-step"}]}`,
+{
+  "grades": [
+    {
+      "work": "your solution steps + verification",
+      "problem": "problem text",
+      "student_answer": "their answer",
+      "correct_answer": "verified answer",
+      "score": 1,
+      "explanation": "2-3 sentence explanation teaching the concept",
+      "hint": "actionable tip for improvement or reinforcement"
+    }
+  ],
+  "overall_score": "X/Y",
+  "encouragement": "encouraging message about their effort"
+}`,
+
+  gradeHomeworkImage: (studentName: string, gradeLevel: string) => `
+Read the homework photo carefully. Grade ${studentName}'s work (grade ${gradeLevel}).
+
+For EACH problem you can read from the image:
+1. Write "work" field FIRST: solve step-by-step and verify by substituting back
+2. Then set correct_answer and score based on your verified solution
+3. Write a clear explanation (2-3 sentences) that teaches the concept
+4. For wrong answers: show where they went wrong and the correct approach
+5. For correct answers: reinforce what they did well
+
+Return ONLY this JSON:
+{
+  "grades": [
+    {
+      "work": "your solution steps + verification",
+      "problem": "problem text from image",
+      "student_answer": "their written answer",
+      "correct_answer": "verified answer",
+      "score": 1,
+      "explanation": "2-3 sentence explanation teaching the concept",
+      "hint": "actionable tip"
+    }
+  ],
+  "overall_score": "X/Y",
+  "encouragement": "encouraging message"
+}`,
+
+  generatePractice: (studentName: string, gradeLevel: string, topics: string[]) => `
+Generate 5 practice problems for ${studentName} (grade ${gradeLevel}) on: ${topics.join(", ")}.
+
+Each problem should be grade-appropriate. Verify each solution by substituting back.
+
+Return ONLY this JSON:
+{
+  "practice_problems": [
+    {
+      "problem": "clear problem statement",
+      "solution": "the answer",
+      "explanation": "step-by-step solution showing how to get the answer"
+    }
+  ]
+}`,
+
+  practiceFromMistakes: (studentName: string, gradeLevel: string, mistakes: { problem: string; student_answer: string; correct_answer: string; explanation: string }[]) => `
+${studentName} (grade ${gradeLevel}) got these problems wrong. Generate 3 similar practice problems for EACH mistake to help them master the concept. Make problems progressively harder.
+
+Mistakes:
+${mistakes.map((m, i) => `${i + 1}. Problem: ${m.problem} | Their answer: ${m.student_answer} | Correct: ${m.correct_answer}`).join("\n")}
+
+Return ONLY this JSON:
+{
+  "practice_sets": [
+    {
+      "original_problem": "the problem they got wrong",
+      "concept": "the concept being practiced (e.g. 'solving equations with fractions')",
+      "problems": [
+        {
+          "problem": "similar practice problem",
+          "solution": "the answer",
+          "explanation": "step-by-step solution"
+        }
+      ]
+    }
+  ]
+}`,
 
   weeklyReport: (data: {
     studentName: string;

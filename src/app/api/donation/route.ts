@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { askClaude, parseJSON } from "@/lib/claude";
+import { askClaudeStream, parseJSON } from "@/lib/claude";
 import { PROMPTS } from "@/lib/prompts";
 
 const PARENT_SYSTEM = `You are a message generator for Wonder Mentorship, a nonprofit homework platform. Generate gentle, impact-based donation messages for parents. Never pressure. Return structured JSON only.`;
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const response = await askClaude(PARENT_SYSTEM, prompt);
+    const response = await askClaudeStream(PARENT_SYSTEM, prompt);
     const result = parseJSON(response);
 
     return NextResponse.json(result);

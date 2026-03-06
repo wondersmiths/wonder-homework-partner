@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { askClaude, parseJSON } from "@/lib/claude";
+import { askClaudeStream, parseJSON } from "@/lib/claude";
 import { SYSTEM_PROMPT, PROMPTS } from "@/lib/prompts";
 import { sanitizeStudentContent } from "@/lib/guardrail";
 import { createClient } from "@/lib/supabase/server";
 
-export const maxDuration = 10;
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = PROMPTS.generatePractice(studentName, gradeLevel, topics);
-    const response = await askClaude(SYSTEM_PROMPT, prompt);
+    const response = await askClaudeStream(SYSTEM_PROMPT, prompt);
     const result = parseJSON(response);
 
     // Guardrail: sanitize student-facing text

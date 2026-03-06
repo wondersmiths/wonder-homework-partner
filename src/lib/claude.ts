@@ -6,33 +6,39 @@ const client = new Anthropic({
 
 type ImageMediaType = "image/jpeg" | "image/png" | "image/gif" | "image/webp";
 
-export async function askClaude(
+export async function askClaudeStream(
   systemPrompt: string,
   userPrompt: string
 ): Promise<string> {
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 2048,
+  let result = "";
+  const stream = await client.messages.stream({
+    model: "claude-sonnet-4-6",
+    max_tokens: 4096,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
   });
 
-  const block = message.content[0];
-  if (block.type === "text") {
-    return block.text;
+  for await (const event of stream) {
+    if (
+      event.type === "content_block_delta" &&
+      event.delta.type === "text_delta"
+    ) {
+      result += event.delta.text;
+    }
   }
-  throw new Error("Unexpected response type from Claude");
+  return result;
 }
 
-export async function askClaudeWithImage(
+export async function askClaudeStreamWithImage(
   systemPrompt: string,
   userPrompt: string,
   imageBase64: string,
   mediaType: ImageMediaType
 ): Promise<string> {
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 2048,
+  let result = "";
+  const stream = await client.messages.stream({
+    model: "claude-sonnet-4-6",
+    max_tokens: 4096,
     system: systemPrompt,
     messages: [
       {
@@ -55,11 +61,15 @@ export async function askClaudeWithImage(
     ],
   });
 
-  const block = message.content[0];
-  if (block.type === "text") {
-    return block.text;
+  for await (const event of stream) {
+    if (
+      event.type === "content_block_delta" &&
+      event.delta.type === "text_delta"
+    ) {
+      result += event.delta.text;
+    }
   }
-  throw new Error("Unexpected response type from Claude");
+  return result;
 }
 
 export function parseJSON(text: string) {
