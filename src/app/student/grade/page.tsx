@@ -189,7 +189,7 @@ export default function GradeHomework() {
                   : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
               }`}
             >
-              Upload a Photo
+              Take a Photo
             </button>
           </div>
         </div>
@@ -229,23 +229,34 @@ export default function GradeHomework() {
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/50 transition-colors">
-                <div className="text-center">
-                  <p className="text-3xl mb-2">📷</p>
+              <div className="flex flex-col gap-3">
+                <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-indigo-300 rounded-lg cursor-pointer bg-indigo-50/50 hover:bg-indigo-100/50 transition-colors">
+                  <div className="text-center">
+                    <p className="text-3xl mb-1">📸</p>
+                    <p className="text-sm font-medium text-indigo-700">
+                      Open Camera
+                    </p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    capture="environment"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+                <label className="flex items-center justify-center w-full py-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <p className="text-sm text-gray-600">
-                    Click to upload or drag a photo here
+                    Or choose from gallery
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    JPEG, PNG, GIF, or WebP (max 10MB)
-                  </p>
-                </div>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              </label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
             )}
           </div>
         )}
