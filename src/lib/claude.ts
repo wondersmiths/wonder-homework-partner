@@ -63,8 +63,18 @@ export async function askClaudeWithImage(
 }
 
 export function parseJSON(text: string) {
-  // Extract JSON from potential markdown code blocks
+  // Try markdown code block first
   const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const jsonStr = jsonMatch ? jsonMatch[1].trim() : text.trim();
-  return JSON.parse(jsonStr);
+  if (jsonMatch) {
+    return JSON.parse(jsonMatch[1].trim());
+  }
+
+  // Try to find JSON object in the text
+  const objectMatch = text.match(/\{[\s\S]*\}/);
+  if (objectMatch) {
+    return JSON.parse(objectMatch[0]);
+  }
+
+  // Last resort: try parsing the whole text
+  return JSON.parse(text.trim());
 }

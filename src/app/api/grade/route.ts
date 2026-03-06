@@ -47,7 +47,16 @@ export async function POST(req: NextRequest) {
       const prompt = PROMPTS.gradeHomework(studentName, gradeLevel, problems);
       response = await askClaude(SYSTEM_PROMPT, prompt);
     }
-    const result = parseJSON(response);
+    let result;
+    try {
+      result = parseJSON(response);
+    } catch (parseError) {
+      console.error("Failed to parse Claude response:", response.substring(0, 200));
+      return NextResponse.json(
+        { error: "Failed to grade homework", debug: `Parse error. Response starts with: ${response.substring(0, 100)}` },
+        { status: 500 }
+      );
+    }
 
     // Strip internal work field and sanitize all student-facing text
     if (result.grades) {
