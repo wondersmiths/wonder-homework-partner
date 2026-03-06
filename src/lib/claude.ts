@@ -8,31 +8,11 @@ type ImageMediaType = "image/jpeg" | "image/png" | "image/gif" | "image/webp";
 
 export async function askClaude(
   systemPrompt: string,
-  userPrompt: string,
-  useThinking = false
+  userPrompt: string
 ): Promise<string> {
-  if (useThinking) {
-    const message = await client.beta.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 16000,
-      thinking: { type: "enabled", budget_tokens: 10000 },
-      system: systemPrompt,
-      messages: [{ role: "user", content: userPrompt }],
-      betas: ["interleaved-thinking-2025-05-14"],
-    });
-
-    // With thinking enabled, find the text block (skip thinking blocks)
-    for (const block of message.content) {
-      if (block.type === "text") {
-        return block.text;
-      }
-    }
-    throw new Error("No text response from Claude");
-  }
-
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 2048,
+    max_tokens: 4096,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
   });
@@ -50,11 +30,9 @@ export async function askClaudeWithImage(
   imageBase64: string,
   mediaType: ImageMediaType
 ): Promise<string> {
-  const message = await client.beta.messages.create({
+  const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 16000,
-    thinking: { type: "enabled", budget_tokens: 10000 },
-    betas: ["interleaved-thinking-2025-05-14"],
+    max_tokens: 4096,
     system: systemPrompt,
     messages: [
       {
@@ -77,13 +55,11 @@ export async function askClaudeWithImage(
     ],
   });
 
-  // With thinking enabled, find the text block (skip thinking blocks)
-  for (const block of message.content) {
-    if (block.type === "text") {
-      return block.text;
-    }
+  const block = message.content[0];
+  if (block.type === "text") {
+    return block.text;
   }
-  throw new Error("No text response from Claude");
+  throw new Error("Unexpected response type from Claude");
 }
 
 export function parseJSON(text: string) {

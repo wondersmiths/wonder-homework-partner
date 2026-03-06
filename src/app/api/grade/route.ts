@@ -43,18 +43,21 @@ export async function POST(req: NextRequest) {
       );
     } else {
       const prompt = PROMPTS.gradeHomework(studentName, gradeLevel, problems);
-      response = await askClaude(SYSTEM_PROMPT, prompt, true);
+      response = await askClaude(SYSTEM_PROMPT, prompt);
     }
     const result = parseJSON(response);
 
-    // Guardrail: sanitize all student-facing text
+    // Strip internal work field and sanitize all student-facing text
     if (result.grades) {
       result.grades = result.grades.map(
-        (g: { explanation: string; hint: string }) => ({
-          ...g,
-          explanation: sanitizeStudentContent(g.explanation),
-          hint: sanitizeStudentContent(g.hint),
-        })
+        (g: { work?: string; explanation: string; hint: string }) => {
+          const { work: _work, ...rest } = g;
+          return {
+            ...rest,
+            explanation: sanitizeStudentContent(g.explanation),
+            hint: sanitizeStudentContent(g.hint),
+          };
+        }
       );
     }
     if (result.encouragement) {

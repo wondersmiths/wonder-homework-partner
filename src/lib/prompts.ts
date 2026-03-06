@@ -20,9 +20,24 @@ TASK:
 6. Provide hints for improvement.
 7. Never mention donations or costs.
 
-CRITICAL: Double-check all arithmetic. Substitute your answer back into the original problem to verify before grading.
+CRITICAL: The "work" field MUST come first in each grade object. You MUST solve the problem and verify your answer in the "work" field BEFORE writing correct_answer or score.
 
-Return JSON:`,
+Return JSON:
+{
+  "grades": [
+    {
+      "work": "Step-by-step solution WITH verification by substituting back into the original equation",
+      "problem": "the problem text",
+      "student_answer": "what the student wrote",
+      "correct_answer": "the verified correct answer",
+      "score": 1 or 0,
+      "explanation": "encouraging explanation for the student (do NOT include your scratch work here)",
+      "hint": "helpful hint for improvement"
+    }
+  ],
+  "overall_score": "X/Y",
+  "encouragement": "an encouraging message"
+}`,
 
   gradeHomeworkImage: (studentName: string, gradeLevel: string) => `
 You are an AI tutor for grades 3-8.
@@ -42,17 +57,18 @@ TASK:
 6. Provide hints for improvement.
 7. Never mention donations or costs.
 
-CRITICAL: Double-check all arithmetic. Substitute your answer back into the original problem to verify before grading.
+CRITICAL: The "work" field MUST come first in each grade object. You MUST solve the problem and verify your answer in the "work" field BEFORE writing correct_answer or score.
 
 Return JSON:
 {
   "grades": [
     {
+      "work": "Step-by-step solution WITH verification by substituting back into the original equation",
       "problem": "the problem text",
       "student_answer": "what the student wrote",
-      "correct_answer": "the correct answer",
+      "correct_answer": "the verified correct answer",
       "score": 1 or 0,
-      "explanation": "encouraging explanation",
+      "explanation": "encouraging explanation for the student (do NOT include your scratch work here)",
       "hint": "helpful hint for improvement"
     }
   ],
@@ -72,15 +88,16 @@ TASK:
 4. Be encouraging and positive.
 5. Never include donation messaging.
 
-CRITICAL: Double-check all arithmetic before providing solutions. Every answer must be verified.
+CRITICAL: Solve each problem step by step, then verify by substituting back. The "work" field must come first.
 
 Return JSON:
 {
   "practice_problems": [
     {
+      "work": "Step-by-step solution with verification",
       "problem": "the problem text",
-      "solution": "the answer",
-      "explanation": "step-by-step explanation"
+      "solution": "the verified answer",
+      "explanation": "step-by-step explanation for the student (do NOT include scratch work)"
     }
   ]
 }`,

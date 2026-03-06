@@ -16,17 +16,20 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = PROMPTS.generatePractice(studentName, gradeLevel, topics);
-    const response = await askClaude(SYSTEM_PROMPT, prompt, true);
+    const response = await askClaude(SYSTEM_PROMPT, prompt);
     const result = parseJSON(response);
 
-    // Guardrail
+    // Strip internal work field and sanitize student-facing text
     if (result.practice_problems) {
       result.practice_problems = result.practice_problems.map(
-        (p: { problem: string; explanation: string }) => ({
-          ...p,
-          problem: sanitizeStudentContent(p.problem),
-          explanation: sanitizeStudentContent(p.explanation),
-        })
+        (p: { work?: string; problem: string; explanation: string }) => {
+          const { work: _work, ...rest } = p;
+          return {
+            ...rest,
+            problem: sanitizeStudentContent(p.problem),
+            explanation: sanitizeStudentContent(p.explanation),
+          };
+        }
       );
     }
 
