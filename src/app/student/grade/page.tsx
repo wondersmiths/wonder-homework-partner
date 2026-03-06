@@ -110,12 +110,12 @@ export default function GradeHomework() {
         body: JSON.stringify(body),
       });
 
-      if (!res.ok) throw new Error("Failed to grade homework");
-
       const data = await res.json();
+      if (!res.ok) throw new Error(data.debug || data.error || "Failed to grade homework");
+
       setResult(data);
-    } catch {
-      setError("Something went wrong. Please try again!");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again!");
     } finally {
       setLoading(false);
     }

@@ -119,8 +119,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error("Grade API error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to grade homework" },
+      { error: "Failed to grade homework", debug: message, hasKey: !!process.env.ANTHROPIC_API_KEY },
       { status: 500 }
     );
   }
