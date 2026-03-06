@@ -13,7 +13,7 @@ const ALLOWED_IMAGE_TYPES = [
 
 type ImageMediaType = (typeof ALLOWED_IMAGE_TYPES)[number];
 
-export const maxDuration = 60;
+export const maxDuration = 10;
 
 export async function POST(req: NextRequest) {
   try {

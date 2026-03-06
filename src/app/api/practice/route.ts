@@ -4,7 +4,7 @@ import { SYSTEM_PROMPT, PROMPTS } from "@/lib/prompts";
 import { sanitizeStudentContent } from "@/lib/guardrail";
 import { createClient } from "@/lib/supabase/server";
 
-export const maxDuration = 60;
+export const maxDuration = 10;
 
 export async function POST(req: NextRequest) {
   try {

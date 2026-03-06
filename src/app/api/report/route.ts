@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const PARENT_SYSTEM = `You are a report generator for Wonder Mentorship, a nonprofit homework platform. Generate clear, appreciative, impact-focused reports for parents. Return structured JSON only.`;
 
-export const maxDuration = 60;
+export const maxDuration = 10;
 
 export async function POST(req: NextRequest) {
   try {
