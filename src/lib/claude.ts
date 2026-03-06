@@ -12,12 +12,13 @@ export async function askClaude(
   useThinking = false
 ): Promise<string> {
   if (useThinking) {
-    const message = await client.messages.create({
+    const message = await client.beta.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 16000,
       thinking: { type: "enabled", budget_tokens: 10000 },
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
+      betas: ["interleaved-thinking-2025-05-14"],
     });
 
     // With thinking enabled, find the text block (skip thinking blocks)
@@ -49,10 +50,11 @@ export async function askClaudeWithImage(
   imageBase64: string,
   mediaType: ImageMediaType
 ): Promise<string> {
-  const message = await client.messages.create({
+  const message = await client.beta.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 16000,
     thinking: { type: "enabled", budget_tokens: 10000 },
+    betas: ["interleaved-thinking-2025-05-14"],
     system: systemPrompt,
     messages: [
       {
