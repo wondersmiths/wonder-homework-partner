@@ -8,8 +8,27 @@ type ImageMediaType = "image/jpeg" | "image/png" | "image/gif" | "image/webp";
 
 export async function askClaude(
   systemPrompt: string,
-  userPrompt: string
+  userPrompt: string,
+  useThinking = false
 ): Promise<string> {
+  if (useThinking) {
+    const message = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 16000,
+      thinking: { type: "enabled", budget_tokens: 10000 },
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+    });
+
+    // With thinking enabled, find the text block (skip thinking blocks)
+    for (const block of message.content) {
+      if (block.type === "text") {
+        return block.text;
+      }
+    }
+    throw new Error("No text response from Claude");
+  }
+
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 2048,
@@ -32,7 +51,8 @@ export async function askClaudeWithImage(
 ): Promise<string> {
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 2048,
+    max_tokens: 16000,
+    thinking: { type: "enabled", budget_tokens: 10000 },
     system: systemPrompt,
     messages: [
       {
@@ -55,11 +75,13 @@ export async function askClaudeWithImage(
     ],
   });
 
-  const block = message.content[0];
-  if (block.type === "text") {
-    return block.text;
+  // With thinking enabled, find the text block (skip thinking blocks)
+  for (const block of message.content) {
+    if (block.type === "text") {
+      return block.text;
+    }
   }
-  throw new Error("Unexpected response type from Claude");
+  throw new Error("No text response from Claude");
 }
 
 export function parseJSON(text: string) {

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = PROMPTS.generatePractice(studentName, gradeLevel, topics);
-    const response = await askClaude(SYSTEM_PROMPT, prompt);
+    const response = await askClaude(SYSTEM_PROMPT, prompt, true);
     const result = parseJSON(response);
 
     // Guardrail

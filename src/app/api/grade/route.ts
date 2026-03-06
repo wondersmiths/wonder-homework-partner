@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       );
     } else {
       const prompt = PROMPTS.gradeHomework(studentName, gradeLevel, problems);
-      response = await askClaude(SYSTEM_PROMPT, prompt);
+      response = await askClaude(SYSTEM_PROMPT, prompt, true);
     }
     const result = parseJSON(response);
 
