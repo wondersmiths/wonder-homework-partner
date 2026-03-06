@@ -4,6 +4,8 @@ import { PROMPTS } from "@/lib/prompts";
 
 const PARENT_SYSTEM = `You are a message generator for Wonder Mentorship, a nonprofit homework platform. Generate gentle, impact-based donation messages for parents. Never pressure. Return structured JSON only.`;
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const { type, ...data } = await req.json();

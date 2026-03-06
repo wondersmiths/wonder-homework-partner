@@ -26,7 +26,7 @@ Return JSON:
 {
   "grades": [
     {
-      "work": "Step-by-step solution WITH verification by substituting back into the original equation",
+      "work": "Brief solve + verify (e.g. 'x=12; check: LHS=1, RHS=1 ✓')",
       "problem": "the problem text",
       "student_answer": "what the student wrote",
       "correct_answer": "the verified correct answer",
@@ -63,7 +63,7 @@ Return JSON:
 {
   "grades": [
     {
-      "work": "Step-by-step solution WITH verification by substituting back into the original equation",
+      "work": "Brief solve + verify (e.g. 'x=12; check: LHS=1, RHS=1 ✓')",
       "problem": "the problem text",
       "student_answer": "what the student wrote",
       "correct_answer": "the verified correct answer",
@@ -94,7 +94,7 @@ Return JSON:
 {
   "practice_problems": [
     {
-      "work": "Step-by-step solution with verification",
+      "work": "Brief solve + verify",
       "problem": "the problem text",
       "solution": "the verified answer",
       "explanation": "step-by-step explanation for the student (do NOT include scratch work)"

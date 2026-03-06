@@ -4,6 +4,8 @@ import { SYSTEM_PROMPT, PROMPTS } from "@/lib/prompts";
 import { sanitizeStudentContent } from "@/lib/guardrail";
 import { createClient } from "@/lib/supabase/server";
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const { studentName, gradeLevel, topics, studentId } = await req.json();
