@@ -21,17 +21,14 @@ export async function POST(req: NextRequest) {
     const response = await askClaude(SYSTEM_PROMPT, prompt);
     const result = parseJSON(response);
 
-    // Strip internal work field and sanitize student-facing text
+    // Guardrail: sanitize student-facing text
     if (result.practice_problems) {
       result.practice_problems = result.practice_problems.map(
-        (p: { work?: string; problem: string; explanation: string }) => {
-          const { work: _work, ...rest } = p;
-          return {
-            ...rest,
-            problem: sanitizeStudentContent(p.problem),
-            explanation: sanitizeStudentContent(p.explanation),
-          };
-        }
+        (p: { problem: string; explanation: string }) => ({
+          ...p,
+          problem: sanitizeStudentContent(p.problem),
+          explanation: sanitizeStudentContent(p.explanation),
+        })
       );
     }
 

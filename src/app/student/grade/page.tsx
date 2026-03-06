@@ -110,7 +110,13 @@ export default function GradeHomework() {
         body: JSON.stringify(body),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(res.status === 504 ? "Request timed out. Try submitting fewer problems." : `Server error: ${text.substring(0, 100)}`);
+      }
       if (!res.ok) throw new Error(data.debug || data.error || "Failed to grade homework");
 
       setResult(data);
