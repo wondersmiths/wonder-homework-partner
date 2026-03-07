@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const STUDENT_EMAIL_DOMAIN = "students.wonderlearning.local";
+const LEGACY_EMAIL_DOMAIN = "students.wondermentorship.local";
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -48,8 +49,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const email = `${trimmedUsername}@${STUDENT_EMAIL_DOMAIN}`;
     const password = `pin_${student.id}_${pin}`;
+
+    // If student already has a user_id, check if they used the old email domain
+    let email = `${trimmedUsername}@${STUDENT_EMAIL_DOMAIN}`;
+    if (student.user_id) {
+      // Try to find the user to determine their email domain
+      const { data: existingUser } = await supabaseAdmin.auth.admin.getUserById(student.user_id);
+      if (existingUser?.user?.email) {
+        email = existingUser.user.email;
+      }
+    }
 
     // If student doesn't have a user_id yet, create the Supabase auth user
     if (!student.user_id) {
