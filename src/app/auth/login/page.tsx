@@ -55,7 +55,7 @@ function LoginForm() {
   return (
     <div className="max-w-md mx-auto mt-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Log In</h1>
-      <p className="text-gray-600 mb-8">Welcome back to Wonder Mentorship.</p>
+      <p className="text-gray-600 mb-8">Welcome back to Wonder Learning.</p>
 
       {message && (
         <div className="p-3 bg-indigo-50 text-indigo-700 text-sm rounded-lg mb-4">

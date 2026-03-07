@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { askClaudeStream, parseJSON } from "@/lib/claude";
 import { PROMPTS } from "@/lib/prompts";
 
-const PARENT_SYSTEM = `You are a message generator for Wonder Mentorship, a nonprofit homework platform. Generate gentle, impact-based donation messages for parents. Never pressure. Return structured JSON only.`;
+const PARENT_SYSTEM = `You are a message generator for Wonder Learning, a nonprofit homework platform. Generate gentle, impact-based donation messages for parents. Never pressure. Return structured JSON only.`;
 
 export const maxDuration = 10;
 

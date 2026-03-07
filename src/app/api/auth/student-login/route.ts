@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const STUDENT_EMAIL_DOMAIN = "students.wondermentorship.local";
+const STUDENT_EMAIL_DOMAIN = "students.wonderlearning.local";
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

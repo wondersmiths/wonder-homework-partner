@@ -5,7 +5,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-[70vh] gap-8">
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-3">
-          Wonder Mentorship
+          Wonder Learning
         </h1>
         <p className="text-lg text-gray-600">
           Your AI-powered homework partner for grades 3-8

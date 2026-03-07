@@ -3,7 +3,7 @@ import { askClaudeStream, parseJSON } from "@/lib/claude";
 import { PROMPTS } from "@/lib/prompts";
 import { createClient } from "@/lib/supabase/server";
 
-const PARENT_SYSTEM = `You are a report generator for Wonder Mentorship, a nonprofit homework platform. Generate clear, appreciative, impact-focused reports for parents. Return structured JSON only.`;
+const PARENT_SYSTEM = `You are a report generator for Wonder Learning, a nonprofit homework platform. Generate clear, appreciative, impact-focused reports for parents. Return structured JSON only.`;
 
 export const maxDuration = 10;
 

@@ -9,7 +9,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Wonder Mentorship - Homework Partner",
+  title: "Wonder Learning - Homework Partner",
   description: "AI-powered homework help for grades 3-8",
 };
 

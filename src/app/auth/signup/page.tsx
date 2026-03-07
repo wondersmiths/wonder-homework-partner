@@ -59,7 +59,7 @@ export default function SignUp() {
     <div className="max-w-md mx-auto mt-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Sign Up</h1>
       <p className="text-gray-600 mb-8">
-        Create your Wonder Mentorship account.
+        Create your Wonder Learning account.
       </p>
 
       <form onSubmit={handleSignUp} className="space-y-4">
