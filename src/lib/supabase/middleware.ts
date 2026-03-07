@@ -44,9 +44,31 @@ export async function updateSession(request: NextRequest) {
   const isPublic = publicPaths.some((p) => path === p);
 
   if (!user && !isPublic) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    return NextResponse.redirect(url);
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/auth/login";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Role-based route protection
+  if (user && (path.startsWith("/parent") || path.startsWith("/student"))) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const role = profile?.role;
+
+    // Students cannot access parent routes
+    if (role === "student" && path.startsWith("/parent")) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/student";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Parents cannot access student routes (they use parent dashboard)
+    // Exception: parents with no children might need to see student view
+    // so we only soft-block this for now
   }
 
   return supabaseResponse;

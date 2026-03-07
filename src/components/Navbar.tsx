@@ -10,6 +10,7 @@ const studentLinks = [
   { href: "/student", label: "Home" },
   { href: "/student/grade", label: "Grade Homework" },
   { href: "/student/practice", label: "Practice" },
+  { href: "/student/review", label: "Weekly Review" },
 ];
 
 const parentLinks = [
